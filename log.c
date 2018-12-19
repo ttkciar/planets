@@ -1,8 +1,16 @@
+#include <fcntl.h>
+#include <zconf.h>
+#include <memory.h>
+#include <mhash.h>
 #include "planets.h"
+
+int instr(char *srch, char *str);
+void Puts(char *s);
 
 /*
  * Print all or portions of the log file
  */
+int
 do_log() {
 	FILE *fp;
 	char buf[80], srch[40];
@@ -50,9 +58,8 @@ do_log() {
 /*
  * Instr() this returns true if srch is in str.
  */
-instr( srch, str )
-char *srch;
-register char *str;
+int
+instr(char *srch, char *str)
 {
 	register char *t = srch, *start;
 	while( *str ) {
@@ -74,10 +81,11 @@ register char *str;
 /*
  * Append a message to the log file of Empire 'emp'.
  */
-logmsg(e_num, fmt, args)
-char e_num, *fmt;
-int args;
+int
+logmsg(int e_num, const char *fmt, char *args, ...)
 {
+	va_list vargs;
+	va_start(vargs, args);
 	FILE *fp;
 	char file[40];
 
@@ -86,7 +94,7 @@ int args;
 		printf("Couldn't open mail file for empire %d.  Mail games.", e_num);
 		return(1);
 	}
-	_doprnt(fmt, &args, fp);
+	fprintf(fp, fmt, vargs);
 	fclose(fp);
 	return(0);
 }
@@ -94,6 +102,7 @@ int args;
 /*
  * Print any new messages in the log file
  */
+void
 checklog()
 {
 	char file[40], buf[BUFSIZ];
@@ -130,9 +139,8 @@ checklog()
  * if flag == 0 print all new telegrams
  * if flag == 1 print all telegrams
  */
-read_tele(num, flag)
-int num;
-char flag;
+int
+read_tele(int num, char flag)
 {
 	char file[40], buf[BUFSIZ], *i, abort = 0;
 	FILE *fp;
@@ -142,7 +150,7 @@ char flag;
 	sprintf(file, "tele_%02d", num);
 	if ((fp = fopen(file, "r+")) == NULL) {
 		puts("Couldn't open tele file.");
-		return;
+		return 0;
 	}
 	if (flag) where = sizeof(long);
 	else {
@@ -150,13 +158,13 @@ char flag;
 		fseek(fp, 0L, 2);
 		if (where == ftell(fp)) {
 			fclose(fp);
-			return;
+			return 0;
 		}
 	}
 
 	fseek(fp, where, 0);
 
-	if ((i = fgets(buf, BUFSIZ, fp)) == NULL) return;
+	if ((i = fgets(buf, BUFSIZ, fp)) == NULL) return 0;
 
 	if (!flag) puts("--- Incoming Telegram ---");
 	putchar ('\n');
@@ -179,9 +187,11 @@ char flag;
 	fseek(fp, 0L, 0);
 	fwrite(&where, sizeof(long), 1, fp);
 	fclose(fp);
+	return 0;
 }
 
-init_log(emp_num)
+int
+init_log(int emp_num)
 {
 	char file[40];
 	register int lfd;
@@ -191,13 +201,15 @@ init_log(emp_num)
 	unlink(file);
 	if ((lfd = creat(file, 0666)) == -1) {
 		puts("Couldn't create log file.");
-		return;
+		return 1;
 	}
 	write(lfd, &where, sizeof(long));
 	close(lfd);
+	return 0;
 }
 
-init_tele(emp_num) {
+void
+init_tele(int emp_num) {
 	char file[40];
 	register int lfd;
 	long where = sizeof(long);
@@ -212,11 +224,11 @@ init_tele(emp_num) {
 	close(lfd);
 }
 
-Puts(s)
-register char *s;
+void
+Puts(char *s)
 {
-	while (*s) 
-		if (*s < 32 && *s != '\n' && *s != '\t') 
+	while (*s)
+		if (*s < 32 && *s != '\n' && *s != '\t')
 				putchar('^'), putchar(*(s++) + 64);
 		else putchar (*s++);
 }

@@ -1,11 +1,23 @@
+#include <zconf.h>
+#include <stdlib.h>
 #include "planets.h"
+
+void checklog();
+void conflict(int, int);
+int lock(int);
+int logmsg(int, char *, ...);
+void turn();
+int read_tele(int, char);
+int rnd(int);
+void unlock();
 
 int def_ships[NUM_SHIPS];
 int num_def_ships;
 
+int
 check_turn() {
 	int l;
-	long now = time(0);
+	long now = time();
 	static int beenhere = 0;
 	static long lasttime;
 	int tabort = 0;
@@ -34,7 +46,7 @@ check_turn() {
 				lseek(fd, 0L, 0);
 				write(fd, &game, sizeof(game));
 				unlock();
-				_exit();
+				_exit(0);
 			}
 		}
 		else
@@ -54,7 +66,7 @@ check_turn() {
 	lasttime = game.hdr.up_last;
 
 	if (verbose) {
-		long sec = game.hdr.up_last + game.hdr.up_time - time(0);
+		long sec = game.hdr.up_last + game.hdr.up_time - time();
 		long min = sec / 60, hour = 0;
 		sec %= 60;
 		
@@ -71,6 +83,7 @@ check_turn() {
 	return tabort;
 }
 
+void
 turn()
 {
 	int i;
@@ -79,10 +92,11 @@ turn()
 	register int j;
 
 	for(i = -1; i < NUM_EMPIRES; ++i)
-		logmsg(i, "\n** Turn #%d **\n", game.hdr.up_num);
+		logmsg((char) i, "\n** Turn #%d **\n", game.hdr.up_num);
 
 	for(i=0; i < NUM_PLANETS; ++i) {
-		int ship_dist(), shipno[NUM_SHIPS], attackers = 0;
+		int ship_dist(), shipno[NUM_SHIPS];
+		size_t attackers = 0;
 
 		num_def_ships = 0;
 		p = &game.planets[i];
@@ -94,7 +108,7 @@ turn()
 			s = &game.ships[j];
 			if (s->s_emp == -1 ) continue;
 			if ((s->s_emp == p->p_emp || s->s_emp == p->p_claim)
-				&& s->s_mode == 0 && s->s_dest == i) 
+				&& s->s_mode == 0 && s->s_dest == i)
 						def_ships[num_def_ships++] = j;
 			if (s->s_mode != 0) {
 				float sx, sy;
@@ -114,7 +128,7 @@ turn()
 					sx = s->s_x;
 					sy = s->s_y;
 				}
-				if (p->p_emp != -1 && (s->s_emp != p->p_emp) 
+				if (p->p_emp != -1 && (s->s_emp != p->p_emp)
 					&& (s->s_seen == -1 || s->s_seen == i)) {
 
 					int tech = p->p_tech;
@@ -130,14 +144,13 @@ turn()
 						default : shiptype = "unidentified";
 					}
 
-					if ((DIST(sx, sy, (float)p->p_x, (float)p->p_y) <= tech)
-					&& ((rnd(100 + stealth) <= (tech + (10 * seen))))) {
+					if ((DIST(sx, sy, (float)p->p_x, (float)p->p_y) <= tech) && ((rnd(100 + stealth) <= (tech + (10 * seen))))) {
 						
 						if (!seen) {
 							logmsg(p->p_emp,
 							"\nA %s ship has been detected at (%2.0f, %3.0f)\n",
 								shiptype, sx, sy, i);
-							s->s_seen = i;
+							s->s_seen = (char) i;
 						} else if ((int)sx != (int)s->s_x
 												|| (int)sy != (int)s->s_y)
 							logmsg(p->p_emp,
@@ -194,12 +207,14 @@ turn()
 	}
 }
 
-ship_dist(a, b)  /* called by qsort(), used to determine which ships */
-int *a, *b;     /* will arrive at the planet first.  */
-{
+/* called by qsort(), used to determine which ships
+ * will arrive at the planet first.
+ */
+int
+ship_dist(int *a, int *b) {
 	struct ship *s1 = &game.ships[*a], *s2 = &game.ships[*b];
-	int time1 = ((s1->s_dist / s1->s_tech) * 10.0);  /* time to get to */
-	int time2 = ((s2->s_dist / s2->s_tech) * 10.0); /*     planet. */
+	int time1 = (int) ((s1->s_dist / s1->s_tech) * 10.0);  /* time to get to */
+	int time2 = (int) ((s2->s_dist / s2->s_tech) * 10.0); /*     planet. */
 
 	if (time1 < time2) return(-1);
 	if (time1 > time2) return(1);
@@ -208,13 +223,14 @@ int *a, *b;     /* will arrive at the planet first.  */
 	return(0);  /* They arrive in ship-number order */
 }
 
+int
 do_turn()
 {
 	if (!lock(1)) return 1;
 	lseek(fd, 0L, 0);
 	read(fd, &game, sizeof(game));
 	turn();
-	game.hdr.up_last = time(0);
+	game.hdr.up_last = time();
 	game.hdr.up_num++;
 	lseek(fd, 0L, 0);
 	write(fd, &game, sizeof(game));

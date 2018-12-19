@@ -1,5 +1,11 @@
+#include <memory.h>
+#include <mhash.h>
 #include "planets.h"
 
+int lock(int);
+void unlock();
+
+int
 do_build() {
 	int pnum, amt;
 	struct planet *p;
@@ -85,7 +91,7 @@ do_build() {
 		else if (!strcmp(av[1], "t")) {
 			if (maxmode) amt = 10000;
 			while( amt ) {
-				if (p->p_res >= COST_TECH(p->p_tech+1) && 
+				if (p->p_res >= COST_TECH(p->p_tech+1) &&
 												p->p_tech+1 <= p->p_util) {
 					p->p_res -= COST_TECH(++p->p_tech);
 					if (p->p_tech-8 > 0)
@@ -94,7 +100,7 @@ do_build() {
 					if (maxmode) break;
 					if (p->p_tech + amt > p->p_util)
 						puts("Cannot increase beyond utility");
-					else 
+					else
 						puts("Too Expensive");
 					unlock();
 					return(1);

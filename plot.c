@@ -1,13 +1,15 @@
 #include "planets.h"
 
 #include <sgtty.h>
+#include <mhash.h>
+#include <termcap.h>
+
 #define xnputs(s,n) tputs(s, n, xputc)
 #define xputs(s)    tputs(s, 1, xputc)
 #define cls()       xnputs(CL, LI)
 #define curs(x, y)  xputs(tgoto(CM, x, y))
 
-extern char *tgetstr(), *tgoto(), **environ, *getenv();
-extern short ospeed;
+extern char **environ;
 
 struct sgttyb _tty;
 int xputc();
@@ -15,11 +17,11 @@ int xputc();
 static char tbuf[512];
 static char *CL, *CM;
 static int CO, LI;
-static char PC = '\0';
 
+int
 initscr()
 {
-	register char *tptr;
+	char *tptr;
 	char *tbufptr, *pc;
 
 	tptr = (char *) malloc(1024);
@@ -34,7 +36,8 @@ initscr()
 		return (0);
 	}
 
-	if(pc = tgetstr("pc", &tbufptr)) PC = *pc;
+	pc = tgetstr("pc", &tbufptr);
+    if (pc) PC = *pc;
 
 	CO = tgetnum ("co");
 	LI = tgetnum ("li");
@@ -44,6 +47,7 @@ initscr()
 	return (CL && CM);
 }
 
+int
 do_plot()
 {
 	static char flag;
@@ -59,7 +63,7 @@ do_plot()
 			return(1);
 		}
 	}
-	else center = (emp == -1) ? 0 : game.empires[emp].e_first;
+	else center = (char) ((emp == -1) ? 0 : game.empires[emp].e_first);
 	if (!flag) flag = initscr();  /* from csr.h, NOT curses.h */
 	if (!flag) {
 		puts ("Terminal must have clearscreen and cursor movement");
@@ -77,7 +81,7 @@ do_plot()
 
 		int x = (((min_x < 0) ? -1 : (MAX_X + 1)) - min_x) * 2;
 
-		for (i=((min_y < 0) ? -min_y : 0); 
+		for (i=((min_y < 0) ? -min_y : 0);
 				(i < (LI-2) && i < (MAX_Y - min_y)); i++) {
 			curs(x, i);
 			putchar('|');
@@ -105,7 +109,9 @@ do_plot()
 	return(0);
 }
 
+int
 xputc(c)  /* an actual function for tputs */
 {
 	putchar(c);
+	return 0;
 }

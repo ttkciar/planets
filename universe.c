@@ -1,20 +1,20 @@
+#include <string.h>
+#include <zconf.h>
+#include <fcntl.h>
+#include <stdlib.h>
 #include "planets.h"
 
-#ifdef vax
-#define PRINT_COM	"lpr -P%s -"
-#else
 #define PRINT_COM	"/bin/print -r=%s -"
-#endif
 
-int ycmp();
+int ycmp(const void *, const void *);
 
-do_universe(out)
-FILE *out;
+int
+do_universe(FILE *out)
 {
 
 	char outline[MAX_X*2 + 12];
-	register	int i;
-	register	int j;
+	int i;
+	int j;
 	int x;
 	int y;
 	int len;
@@ -29,7 +29,7 @@ FILE *out;
 	}
 
 	if (out == stdout) {
-		char c;
+		int c;
 		if (ac == 1) {
 			puts("Usage: 'universe <printer>' or 'universe > filename'");
 			return(1);
@@ -83,14 +83,14 @@ FILE *out;
 	/* Print vertical numbers 0-59 on the top two lines */
 	write(outfd, "\n", 1);
 
-	for (x = 0; x < MAX_X; ++x) 
-		outline[5 + x*2] =  '0' + (x % 100) / 10;
+	for (x = 0; x < MAX_X; ++x)
+		outline[5 + x*2] =  (char) ('0' + (x % 100) / 10);
 	outline[6 + MAX_X*2] = '\n';
 
 	write(outfd, outline, MAX_X*2+7);
 
-	for (x = 0; x < MAX_X; ++x) 
-		outline[5 + x*2] = '0' + x % 10;
+	for (x = 0; x < MAX_X; ++x)
+		outline[5 + x*2] = (char) ('0' + x % 10);
 	outline[6 + MAX_X*2] = '\n';
 
 	write(outfd, outline, MAX_X*2+7);
@@ -104,7 +104,7 @@ FILE *out;
 
 	write(outfd, outline, MAX_X*2+7);
 
-	for (x = 0; x < MAX_X*2+10; ++x) 
+	for (x = 0; x < MAX_X*2+10; ++x)
 		outline[x] = ' ';
 
 	s_top=0;
@@ -119,7 +119,7 @@ FILE *out;
 		outline[MAX_X*2+5] = '|';
 		while( s_top < NUM_PLANETS && game.planets[sorty[s_top]].p_y == y ) {
 			sprintf(nbuf, "%02d%c", sorty[s_top],
-				(game.planets[sorty[s_top]].p_emp == emp && emp != -1) ? 
+				(game.planets[sorty[s_top]].p_emp == emp && emp != -1) ?
 											'*' : ' ');
 			strncpy(outline + 4 + game.planets[sorty[s_top]].p_x * 2, nbuf, 3);
 			++s_top;
@@ -129,7 +129,7 @@ FILE *out;
 	}
 
 	/* print a long one of these:  +------+ */
-	for (x = 0; x < MAX_X*2+10; ++x) 
+	for (x = 0; x < MAX_X*2+10; ++x)
 		outline[x] = ' ';
 
 	outline[3] = '+';
@@ -141,17 +141,17 @@ FILE *out;
 	write(outfd, outline, MAX_X*2+7);
 
 	/* Print vertical numbers 0-59 on the bottom two lines */
-	for (x = 0; x < MAX_X*2+10; ++x) 
+	for (x = 0; x < MAX_X*2+10; ++x)
 		outline[x] = ' ';
 
-	for (x = 0; x < MAX_X; ++x) 
-		outline[5 + x*2] =  '0' + (x % 100) / 10;
+	for (x = 0; x < MAX_X; ++x)
+		outline[5 + x*2] =  (char) ('0' + (x % 100) / 10);
 	outline[6 + MAX_X*2] = '\n';
 
 	write(outfd, outline, MAX_X*2+7);
 
-	for (x = 0; x < MAX_X; ++x) 
-		outline[5 + x*2] = '0' + x % 10;
+	for (x = 0; x < MAX_X; ++x)
+		outline[5 + x*2] = (char) ('0' + x % 10);
 	outline[6 + MAX_X*2] = '\n';
 
 	write(outfd, outline, MAX_X*2+7);
@@ -170,10 +170,12 @@ FILE *out;
 	return(0);
 }
 
-ycmp(n1, n2)
-int *n1, *n2;
+int
+ycmp(const void *p1, const void *p2)
 {
-	if (game.planets[*n1].p_y > game.planets[*n2].p_y) return 1;
-	if (game.planets[*n1].p_y < game.planets[*n2].p_y) return -1;
+    int n1 = *((int *) p1);
+	int n2 = *((int *) p2);
+	if (game.planets[n1].p_y > game.planets[n2].p_y) return 1;
+	if (game.planets[n1].p_y < game.planets[n2].p_y) return -1;
 	return 0;
 }

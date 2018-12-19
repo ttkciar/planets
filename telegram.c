@@ -1,13 +1,27 @@
+#include <zconf.h>
+#include <fcntl.h>
+#include <memory.h>
 #include "planets.h"
-
-char *mktemp();
 
 char buf[BUFSIZ];
 
+
+int last_dot();
+int read_in();
+void headers(int num);
+void inc_dot();
+void saveall(FILE *tfp);
+void tele_break();
+void telecmds();
+void type(int num);
+void telegram();
+
+int
 do_telegram() {
 	char telefile[40], *tmpfile = mktemp("/tmp/plXXXXXX");
 	char subj[81];
-	int tmp, n, i, j;
+	int tmp, i, j;
+	ssize_t n;
 	FILE *ftmp, *ftele;
 
 	if (ac == 1) {
@@ -58,7 +72,7 @@ do_telegram() {
 	fgets(subj, 80, stdin);
 
 	while( (n = read(0, buf, BUFSIZ)) > 0 )
-		write(tmp, buf, n);
+		write(tmp, buf, (size_t) n);
 
 	puts("Sending telegram..."), fflush(stdout);
 	close(tmp);
@@ -77,13 +91,13 @@ do_telegram() {
 			return(1);
 		}
 
-		fprintf(ftele, "From: %s\n", (ac == 3) ? "Unknown" : 
+		fprintf(ftele, "From: %s\n", (ac == 3) ? "Unknown" :
 				((MASTER) ? "Manager" : game.empires[emp].e_name));
 		fprintf(ftele, "To: %s\n", av[1]);
 		fprintf(ftele, "Subject: %s\n", subj);
 
 		while( (n = getc(ftmp)) != EOF )
-			putc(n, ftele);
+			putc((int) n, ftele);
 
 		putc('\n', ftele);
 		fclose(ftmp);
@@ -111,10 +125,9 @@ int delta;
 int allgone;
 
 jmp_buf tele_env;
-int tele_break();
-char *mktemp();
 char tele_file[10];
 
+void
 telegram() {
 	sprintf(tele_file, "tele_%02d", emp);
 	fp = fopen(tele_file, "r+");
@@ -137,59 +150,68 @@ telegram() {
 	fclose(fp);
 }
 
-int tele_break();
-
-telecmds() {
-	char c, str1[40], str2[40], *s;
+void
+telecmds()
+{
+	char str1[40], str2[40], *s;
+	int c;
 	int argnum = 0;
-	char cmd;
-	int (*sigint)(), (*sigquit)();
+	int cmd;
+	void (*sigint)(), (*sigquit)();
 
 	sigint = signal(SIGINT, tele_break);
 	sigquit = signal(SIGQUIT, tele_break);
 
-	if (setjmp(tele_env))
+	if (setjmp(tele_env)) {
 		putchar('\n');
+	}
 
 	for(;;) {
 		fputs("& ", stdout);
 		fflush(stdout);
-		while( (c = getchar()) == ' ');
+		while ((c = getchar()) == ' ');
 
 		if (isalpha(c)) {
 			cmd = c;
 			c = getchar();
 		}
-		else
+		else {
 			cmd = 't';
+		}
 
-		while( c == ' ') c = getchar();
+		while (c == ' ') {
+			c = getchar();
+		}
 
-		if ( isdigit(c) ) {
+		if (isdigit(c)) {
 			argnum = 0;
-			while( isdigit(c) ) {
+			while (isdigit(c)) {
 				argnum = argnum * 10 + c - '0';
 				c = getchar();
 			}
 		}
-		else
+		else {
 			argnum = -1;
+		}
 
-		while( c != '\n' )
+		while (c != '\n') {
 			c = getchar();
+		}
 
 		switch(cmd) {
 		case 't':
 			if (argnum < 0) {
-				if ( last_dot() )
+				if (last_dot()) {
 					puts("at end-of-file");
+				}
 				else {
 					inc_dot();
 					type(dot);
 				}
 			}
-			else
+			else {
 				type(argnum);
+			}
 			break;
 		case 'd':
 			if (dot == -1) {
@@ -250,7 +272,8 @@ telecmds() {
 	}
 }
 
-type(num) {
+void
+type(int num) {
 	if (num < 0 || num >= num_msgs || !msgs[num].m_used) {
 		puts("bad message number");
 		return;
@@ -266,6 +289,7 @@ type(num) {
 	dot = num;
 }
 
+int
 read_in() {
 	long seeknum;
 
@@ -297,7 +321,8 @@ read_in() {
 	return 1;
 }
 
-headers(num)
+void
+headers(int num)
 {
 	int i;
 	if (num_msgs == 0) {
@@ -314,6 +339,7 @@ headers(num)
 	}
 }
 
+void
 tele_break() {
 	signal(SIGINT, tele_break);
 	signal(SIGQUIT, tele_break);
@@ -321,6 +347,7 @@ tele_break() {
 }
 
 /* is this the last message? */
+int
 last_dot() {
 	int i;
 	for( i=dot+1; i < num_msgs; ++i)
@@ -328,6 +355,7 @@ last_dot() {
 	return 1;
 }
 
+void
 inc_dot() {
 	int i;
 	for( i=dot+1; i < num_msgs; ++i)
@@ -344,8 +372,8 @@ inc_dot() {
 	allgone = 1;
 }
 
-saveall(tfp)
-FILE *tfp;
+void
+saveall(FILE *tfp)
 {
 	int i;
 	for(i=0; i < num_msgs; ++i) {

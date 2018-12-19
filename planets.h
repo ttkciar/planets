@@ -81,10 +81,11 @@ char prompt[25];
 char *av[20];
 int ac;
 
-char *malloc(), verbose, *getenv(), *home;
-long time(), lseek(), fseek(), atol();
+char verbose, *home;
+long time();
 long seed;
-int emp, uid, ctrl_c();
+int emp, uid;
+void ctrl_c(int);
 int fd;
 
 #define EMPIRE(x)	(long)((sizeof(game.hdr)) + ((x) * sizeof(struct empire)))

@@ -1,5 +1,12 @@
+#include <mhash.h>
 #include "planets.h"
 
+int lock(int);
+void pr_ship(FILE *, int);
+void ship_hdr(FILE *);
+void unlock();
+
+int
 do_make() {
 	int pnum;
 	int amt, i;
@@ -17,15 +24,15 @@ do_make() {
 	type = av[2][0];
 	if (game.planets[pnum].p_emp != emp && !MASTER) {
 		puts("You do not own that planet.");
-		return;
+		return(1);
 	}
 
-    if (!lock(1)) return;
+    if (!lock(1)) return(1);
 
 	lseek(fd, 0L, 0);
 	read(fd, &game, sizeof(game));
 
-	for(i=0; i < NUM_SHIPS; ++i) 
+	for(i=0; i < NUM_SHIPS; ++i)
 		if (game.ships[i].s_emp == -1)
 			break;
 
@@ -38,7 +45,7 @@ do_make() {
 	if (i == game.hdr.ship_top) game.hdr.ship_top++;
 
 	if (type == 'b') {
-		int cost = ((COST_BATTLE - (game.planets[pnum].p_tech * 3)) + 
+		int cost = ((COST_BATTLE - (game.planets[pnum].p_tech * 3)) +
 					amt * (COST_DEF - (game.planets[pnum].p_tech / 2)));
 
 		if (game.planets[pnum].p_res < cost) {
@@ -66,7 +73,7 @@ do_make() {
 		sprintf(name, "Colony_%02d", i);
 	}
 	else if (type == 's') {
-		int cost = ((COST_SCOUT - game.planets[pnum].p_tech) + 
+		int cost = ((COST_SCOUT - game.planets[pnum].p_tech) +
 					amt * (COST_STEALTH - (game.planets[pnum].p_tech / 4)));
 
 		if (game.planets[pnum].p_res < cost) {

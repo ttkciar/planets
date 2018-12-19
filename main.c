@@ -1,24 +1,37 @@
 /*
-** Planets
-** Original version by Charles Rand
-**
-** 4/7/86
-** Completely re-written by Chuck Peterson and Keith Reynolds
-** For the U.C. Santa Cruz Game Shell
-**
-*/
+ * Planets
+ * Original version by Charles Rand
+ *
+ * 1986-04-07
+ * Completely re-written by Chuck Peterson and Keith Reynolds
+ * For the U.C. Santa Cruz Game Shell
+ *
+ * 2018-12-09 Ported to C11 by Bill Karwin
+ */
 
+#include <fcntl.h>
+#include <mhash.h>
+#include <sys/stat.h>
 #include "planets.h"
+
+void checklog();
+void commands();
+int do_init();
+void init_tele(int);
+int read_tele(int, char);
+void unlock();
 
 char obuf[BUFSIZ];
 
+// TODO make master_uid configurable
 int master_uid = 97;
+// TODO make playdir configurable
 char *playdir;
+// TODO make helpdir configurable
 char *helpdir = "/usr/games/lib/planet_help";
 
-main(argc, argv)
-int argc;
-char **argv;
+int
+main(int argc, char **argv)
 {
 	int i, master = 0;
 
@@ -89,7 +102,7 @@ char **argv;
 	}
 
 	if ((MASTER || emp != -1)) {  /* temporary, we want to read other's mail */
-/* 	if (!master && (MASTER || emp != -1)) { /* Don't read mail if MASTER is */
+// 	if (!master && (MASTER || emp != -1)) { /* Don't read mail if MASTER is */
 		read_tele(emp, 0);                  /* on as someone else           */
 		if (emp != -1) checklog();
 	}
@@ -100,6 +113,7 @@ char **argv;
 /* from rogue */
 #define RN (((seed = seed*11109+13849) & 0x7fff) >> 1)
 
-rnd(n) {
-	return (n <= 0) ? 0 : RN % n;
+int
+rnd(int n) {
+	return (int) (n <= 0 ? 0 : RN % n);
 }

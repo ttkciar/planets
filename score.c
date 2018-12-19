@@ -1,3 +1,4 @@
+#include <mhash.h>
 #include "planets.h"
 
 struct score {
@@ -7,10 +8,10 @@ struct score {
 	long t_tot;
 };
 
-int scorecmp();
+int scorecmp(const void *, const void *);
 
-do_score(fp)
-FILE *fp;
+int
+do_score(FILE *fp)
 {
 	int i, j;
 	int aflg = (ac == 2);
@@ -73,9 +74,11 @@ FILE *fp;
 		return(0);
 }
 
-scorecmp(s1, s2)
-struct score *s1, *s2;
+int
+scorecmp(const void *p1, const void *p2)
 {
+	struct score *s1 = (struct score *) p1;
+	struct score *s2 = (struct score *) p2;
 	if (s1->t_tot < s2->t_tot) return 1;
 	if (s1->t_tot > s2->t_tot) return -1;
 	return 0;

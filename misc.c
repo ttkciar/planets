@@ -1,6 +1,20 @@
 #include "planets.h"
 #include <pwd.h>
+#include <zconf.h>
+#include <mhash.h>
 
+int init_log(int);
+void init_tele(int);
+int lock(int);
+void planet_hdr(FILE *);
+void pr_planet(FILE *, int);
+void pr_scan(int);
+void pr_ship(FILE *, int);
+void scan_hdr();
+void ship_hdr(FILE *);
+void unlock();
+
+int
 do_hdr() {
 	lseek(fd, 0L, 0);
 	read(fd, &game.hdr, sizeof(game.hdr) );
@@ -9,8 +23,10 @@ do_hdr() {
 	printf("game.hdr.up_num  = %d\n", game.hdr.up_num );
 	printf("game.hdr.max_fleet = %d\n", game.hdr.max_fleet );
 	printf("game.hdr.ship_top  = %d\n", game.hdr.ship_top );
+	return 0;
 }
 
+int
 do_empires() {
 	int i, u;
 	lseek(fd, 0L, 0);
@@ -20,14 +36,14 @@ do_empires() {
 		u = game.empires[i].e_uid;
 		printf( "%2d %-20s %4d", i, game.empires[i].e_name, u);
 		if (ac != 1 && u != -1)
-			printf("  %s", getpwuid(game.empires[i].e_uid)->pw_name);
+			printf("  %s", getpwuid((uid_t) game.empires[i].e_uid)->pw_name);
 		putchar('\n');
 	}
 	return 0;
 }
 
-do_planets(out)
-FILE *out;
+int
+do_planets(FILE *out)
 {
 	int i;
 	lseek(fd, PLANET(0), 0);
@@ -56,8 +72,8 @@ FILE *out;
 	return 0;
 }
 
-do_ship(out)
-FILE *out;
+int
+do_ship(FILE *out)
 {
 	int i;
 	if (ac != 2) {
@@ -83,8 +99,8 @@ FILE *out;
 	}
 }
 
-do_fleet(out)
-FILE *out;
+int
+do_fleet(FILE *out)
 {
 	int i, p = -1;
 	int flg;
@@ -143,9 +159,10 @@ FILE *out;
 	return 0;
 }
 
+int
 do_name()
 {
-	if (ac == 2 || (ac == 4 && strcmp(av[1], "-s")) || ac > 4) {
+	if (ac == 2 || (ac == 4 && strcmp(av[1], "-s") != 0) || ac > 4) {
 		puts("Usage: name planet_num new_planet_name");
 		puts("Or:    name -s ship_num new_ship_name");
 		return 1;
@@ -161,7 +178,7 @@ do_name()
 			return 1;
 		}
 
-		if (!lock(1)) return;
+		if (!lock(1)) return 1;
 		lseek(fd, PLANET(i), 0);
 		read(fd, &game.planets[i], sizeof(struct planet));
 		if (game.planets[i].p_emp != emp) {
@@ -183,7 +200,7 @@ do_name()
 			return 1;
 		}
 
-		if (!lock(1)) return;
+		if (!lock(1)) return 1;
 		lseek(fd, SHIP(i), 0);
 		read (fd, &game.ships[i], sizeof(struct ship));
 		if (game.ships[i].s_emp != emp) {
@@ -200,6 +217,7 @@ do_name()
 	return 0;
 }
 
+int
 do_dist() {
 	int p1, p2;
 	if (ac != 3) {
@@ -222,6 +240,7 @@ do_dist() {
 	return 0;
 }
 
+int
 do_scan() {
 	int i, p = -1;
 
@@ -243,13 +262,14 @@ do_scan() {
 	return 0;
 }
 
+int
 do_un_nuke() {
 	int n = atoi(av[1]);
 	if (ac == 1) {
 		puts("usage: planet_num name emp x y util prod def tech res");
 		return 1;
 	}
-	if (!lock(1)) return;
+	if (!lock(1)) return 1;
 	lseek(fd, PLANET(n), 0);
 	read(fd, &game.planets[n], sizeof(struct planet) );
 	strcpy(game.planets[n].p_name, av[2]);
@@ -267,6 +287,7 @@ do_un_nuke() {
 	return 0;
 }
 
+int
 do_move() {
 	int num;
 	if (ac != 4) {
@@ -289,6 +310,7 @@ do_move() {
 	return 0;
 }
 
+int
 do_lfiles() {
 	int i;
 	if (ac != 1) {
@@ -300,6 +322,7 @@ do_lfiles() {
 	return 0;
 }
 
+int
 do_tfiles() {
 	int i;
 	if (ac != 1) {
@@ -311,6 +334,7 @@ do_tfiles() {
 	return 0;
 }
 
+int
 do_rename()
 {
 	int emp;
@@ -328,4 +352,5 @@ do_rename()
 	lseek(fd, EMPIRE(emp), 0);
 	write(fd, &game.empires[emp], sizeof(struct empire));
 	unlock();
+	return 0;
 }

@@ -1,5 +1,10 @@
+#include <mhash.h>
 #include "planets.h"
 
+int lock(int);
+void unlock();
+
+int
 do_direct() {
 	int shpno, pnum;
 	struct ship *s;

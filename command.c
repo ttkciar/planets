@@ -1,3 +1,7 @@
+#include <memory.h>
+#include <zconf.h>
+#include <mhash.h>
+#include <fcntl.h>
 #include "planets.h"
 
 struct cmd{
@@ -6,13 +10,19 @@ struct cmd{
 	int (*func)();
 };
 
+int alias_sub(register char *, register char *);
+int check_turn();
 int do_init(), do_help(), do_turn(), do_build(), do_planets(),
 	do_fleet(), do_enroll(), do_make(), do_direct(), do_echo(),
 	do_source(), do_alias(), do_exit(), do_plot(), do_range(), do_log(),
 	do_interval(), unlock(), do_score(), do_update(), do_name(), do_set(),
-	do_telegram(), do_universe(), do_empires(), do_next(), do_ship();
+	do_telegram(), do_universe(), do_empires(), do_next(), do_ship(),
 	do_dist(), do_scan(), do_un_nuke(), do_move(), do_lfiles(), do_tfiles(),
 	do_history(), do_hdr(), do_rename(), do_max_fleet(), do_mark();
+int execute(char *);
+int hist_sub(char *, char *);
+int lock(int);
+int make_argv(char *);
 
 struct cmd cmds[] = {
 	{"alias", 	0,	do_alias},
@@ -61,6 +71,15 @@ struct cmd cmds[] = {
 
 jmp_buf jmpenv;
 
+void commands();
+void init_tele(int);
+void planet_hdr(FILE *);
+void pr_planet(FILE *, int);
+void pr_ship(FILE *, int);
+void ship_hdr(FILE *);
+void turn();
+
+void
 commands()
 {
 	register char *s, *e;
@@ -179,8 +198,8 @@ commands()
  * needs to be passed here.
  *
  */
-execute(com)
-char *com;
+int
+execute(char *com)
 {
 	register int i;
 	FILE *out;
@@ -224,7 +243,7 @@ char *com;
 				return 1;
 			}
 			else {
-				printf("%s: Priviledged command.\n", av[0]);
+				printf("%s: Privileged command.\n", av[0]);
 				return 1;
 			}
 			break;
@@ -234,12 +253,14 @@ char *com;
 		printf("no such command '%s'\n", av[0]);
 		return 1;
 	}
+	return 0;
 }
 
-ctrl_c() {
+void
+ctrl_c(int i) {
 	signal(SIGINT, ctrl_c);
-	stdout->_cnt = BUFSIZ;
-	stdout->_ptr = stdout->_base;
+	// stdout->_cnt = BUFSIZ;
+	// stdout->_ptr = stdout->_base;
 	longjmp(jmpenv, 1);
 }
 
@@ -247,8 +268,8 @@ ctrl_c() {
  * String is terminated with \n
  * Assumes quotes have already been checked.
  */
-make_argv(s)
-register char *s;
+int
+make_argv(char *s)
 {
 	static char avbuf[256];
 	register char *d = avbuf;
@@ -273,8 +294,10 @@ register char *s;
 	return 0;
 }
 
+int
 do_help() {
-	int fd, i, shown=0;
+	int fd, shown=0;
+	ssize_t i;
 	char buf[BUFSIZ];
 
 	char **argv = av;
@@ -297,18 +320,21 @@ do_help() {
 				printf("Unable to find help on '%s'\n", *argv);
 			else {
 				while( (i = read(fd, buf, BUFSIZ)) > 0 )
-					write(1, buf, i);
+					write(1, buf, (size_t) i);
 				close(fd);
 			}
 		}
+    return 0;
 }
 
+int
 do_mark() {
 	if (!lock(1)) return 1;
 	lseek(fd, 0L, 0);
 	read(fd, &game.hdr, sizeof(game.hdr));
-	game.hdr.up_last = time(0);
+	game.hdr.up_last = time();
 	lseek(fd, 0L, 0);
 	write(fd, &game.hdr, sizeof(game.hdr));
 	unlock();
+	return 0;
 }

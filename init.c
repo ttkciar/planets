@@ -1,4 +1,12 @@
+#include <zconf.h>
+#include <mhash.h>
 #include "planets.h"
+
+int init_log(int);
+void init_tele(int);
+int lock(int);
+int rnd(int);
+void unlock();
 
 char *names[] = {"Pyruss",     "Tattooine",  "Magrathea",  "Vogon",
 				 "Skaros",     "Talos IV",   "Urras",      "Skywatch",
@@ -26,9 +34,9 @@ char *names[] = {"Pyruss",     "Tattooine",  "Magrathea",  "Vogon",
 				 "Moscow",     "Roq",        "Maraschino", "Grimm",
 				 "Lovecraft",  "Peace",      "Defense 92", "Kendel" };
 
+int
 do_init() {
 	int i, c, NUM_NAMES = sizeof(names) / sizeof(char *);
-	char dfile[50];
 
 	printf("Do you really want to re-initialize everything? ");
 	fflush(stdout);
@@ -120,7 +128,7 @@ do_init() {
 		game.ships[i].s_name[0] = 0;
 	}
 
-	game.hdr.up_last = time(0);
+	game.hdr.up_last = time();
 	game.hdr.up_time = 21600L;   /* six - hour default */
 	game.hdr.up_num = 0;
 	game.hdr.max_fleet = NUM_SHIPS;
@@ -131,11 +139,12 @@ do_init() {
 	return(0);
 }
 
+int
 do_enroll() {
 	int num, i;
 	int unused[NUM_PLANETS];
 	int utop=0;
-	char buf[BUFSIZ], *c, *gets();
+	char buf[BUFSIZ], *c;
 
 	if (ac != 1 && !MASTER) {
 		puts("Usage: enroll");
@@ -146,7 +155,7 @@ do_enroll() {
 	read(fd, &game, sizeof(game) );
 
 	if (MASTER) {
-		int uid_enroll, planetno;
+		int uid_enroll;
 
 		if (ac < 3 || (((emp = atoi(av[2])) != -1) && ac == 3) || ac > 4) {
 			puts("Usage: enroll <uid> <empire> <planet>");
@@ -164,7 +173,7 @@ do_enroll() {
 			game.empires[emp].e_uid = uid_enroll;
 			i = atoi(av[3]);
 			game.empires[emp].e_first = i;
-			game.planets[i].p_emp = emp;
+			game.planets[i].p_emp = (char) emp;
 		}
 		else {
 			lseek(fd, 0L, 0);
@@ -215,14 +224,15 @@ do_enroll() {
 
 		i = unused[rnd(utop)];
 		game.empires[emp].e_first = i;
-		game.planets[i].p_emp = emp;
+		game.planets[i].p_emp = (char) emp;
 
 	}
 	fputs("Enter a name for your empire (up to 20 characters): ", stdout);
 	fflush(stdout);
 
 	while ((c = gets(buf)) != NULL) {
-		int len = strlen(buf), j;
+		size_t len = strlen(buf);
+		int j;
 		char good = 1;
 
 		for (j=0; j<len; j++) {

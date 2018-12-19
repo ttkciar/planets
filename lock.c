@@ -1,8 +1,11 @@
+#include <fcntl.h>
+#include <zconf.h>
 #include "planets.h"
 
-static int (*sigint)();
+static void (*sigint)();
 
-lock(n) {
+int
+lock(int n) {
 	int lfd;
 	int num = n?4:0;
 	sigint = signal(SIGINT, SIG_IGN);
@@ -29,6 +32,7 @@ lock(n) {
 	}
 }
 
+void
 unlock() {
 	unlink("LOCK");
 	signal(SIGINT, sigint);

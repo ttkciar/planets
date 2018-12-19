@@ -1,11 +1,17 @@
+#include <memory.h>
+#include <mhash.h>
 #include "planets.h"
 
+int lock(int);
+void unlock();
+
+int
 do_update() {
 	int shipno, amt;
 	struct ship *s;
 
-	if (ac!=4 || (strcmp("r",av[1]) && strcmp("d",av[1])
-					&& strcmp("t",av[1]) && strcmp("s", av[1]))) {
+	if (ac!=4 || (strcmp("r",av[1])!=0 && strcmp("d",av[1])!=0
+					&& strcmp("t",av[1])!=0 && strcmp("s", av[1])!=0)) {
 		puts("usage: update [r|d|t|s] ship_num amount");
 		return(1);
 	}

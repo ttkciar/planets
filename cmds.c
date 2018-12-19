@@ -1,5 +1,11 @@
+#include <memory.h>
+#include <mhash.h>
 #include "planets.h"
 
+int lock(int);
+void unlock();
+
+int
 do_alias() {
 	int i;
 	char abuf[80];
@@ -33,7 +39,7 @@ do_alias() {
 			}
 			strcpy(aliases[atop++].a_str = m , av[1]);
 		}
-		while( s = *v++ ) {
+		while( (s = *v++) ) {
 			while( *s )
 				*a++ = *s++;
 			if (*v) *a++ = ' ';
@@ -50,6 +56,7 @@ do_alias() {
 	return 0;
 }
 
+int
 do_source() {
 	char file [80];
 
@@ -65,7 +72,7 @@ do_source() {
 	if (av[1][0] != '/') sprintf(file, "%s/%s", home, av[1]);
 	else strcpy (file, av[1]);
 
-	if ((fstack[ftop] == fopen(file, "r")) != NULL) {
+	if ((fstack[ftop] = fopen(file, "r")) != NULL) {
 		++ftop;
 		return 0;
 	}
@@ -75,8 +82,9 @@ do_source() {
 	}
 }
 
+int
 do_interval() {
-	if (!lock(1)) return;
+	if (!lock(1)) return 1;
 	lseek(fd, 0L, 0);
 	read(fd, &game.hdr, sizeof(game.hdr));
 	if (ac == 1)
@@ -91,6 +99,7 @@ do_interval() {
 	return 0;
 }
 
+int
 do_exit() {
 	if (ftop == 1) {
 		close(fd);
@@ -101,6 +110,7 @@ do_exit() {
 	return 0;
 }
 
+int
 do_next() {
 	long sec, min, hour;
 
@@ -110,7 +120,7 @@ do_next() {
 	lseek(fd, 0L, 0);
 	read(fd, &game.hdr, sizeof( game.hdr ) );
 
-	sec = game.hdr.up_last + game.hdr.up_time - time(0);
+	sec = game.hdr.up_last + game.hdr.up_time - time();
 	min = sec / 60;
 	hour = 0;
 	sec %= 60;
@@ -134,8 +144,8 @@ do_next() {
  * Both strings are terminated by \n
  * Assumes quotes are matched.
  */
-alias_sub(src, dest)
-register char *src, *dest;
+int
+alias_sub(register char *src, register char *dest)
 {
 	register char *a;
 	char abuf[40], *src_start;
@@ -184,13 +194,14 @@ register char *src, *dest;
 	return ret;
 }
 
+int
 do_set()
 {
 	if (ac == 1) {
 		fputs("prompt\t", stdout);
 		puts(prompt);
-		if (verbose) puts("verbose"); 
-		else puts("noverbose"); 
+		if (verbose) puts("verbose");
+		else puts("noverbose");
 		return 0;
 	}
 	if (!strcmp(av[1], "prompt")) {
@@ -199,7 +210,7 @@ do_set()
 			return 1;
 		}
 		else strncpy (prompt, av[2], 24);
-		prompt[25] = 0;
+		prompt[24] = 0;
 		return 0;
 	}
 	if (!strcmp(av[1], "noverbose")) {
@@ -220,9 +231,9 @@ do_set()
  * Both strings are terminated with \n\0
  * This checks for unmatched quotes
  */
-hist_sub(s, d)
-char *s, *d;
-{ 
+int
+hist_sub(char *s, char *d)
+{
 	char *t;
 	int delta=0;
 
@@ -333,14 +344,17 @@ char *s, *d;
 	return delta;
 }
 
+int
 do_history() {
 	int i;
 	i = (comnum - HISTORY < 0) ? 0 : comnum - HISTORY;
 	for(; i < comnum; ++i) {
 		printf("%d\t%s", i, history[i%HISTORY] );
 	}
+	return 0;
 }
 
+int
 do_max_fleet() {
 	if (ac != 2) { puts("usage: max_fleet num"); return 1; }
 	if (!lock(1)) return 1;
@@ -350,9 +364,11 @@ do_max_fleet() {
 	lseek(fd, 0L, 0);
 	write(fd, &game.hdr, sizeof(game.hdr));
 	unlock();
+	return 0;
 }
 
 /*  And for completeness... */
+int
 do_echo() {
 	char **a = av+1, newline = 1;
 

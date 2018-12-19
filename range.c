@@ -1,3 +1,4 @@
+#include <mhash.h>
 #include "planets.h"
 
 struct rngstr {
@@ -5,8 +6,9 @@ struct rngstr {
 	float rdist;
 };
 
-int testum();
+int testum(const void *, const void *);
 
+int
 do_range() {
 	struct rngstr rng[NUM_PLANETS];
 	int amt, pnum, i;
@@ -56,9 +58,11 @@ do_range() {
 	return(0);
 }
 
-testum(r1, r2)
-struct rngstr *r1, *r2;
+int
+testum(const void *p1, const void *p2)
 {
+	struct rngstr *r1 = (struct rngstr *) p1;
+	struct rngstr *r2 = (struct rngstr *) p2;
 	if (r1->rdist > r2->rdist) return(1);
 	if (r1->rdist == r2->rdist) return(0);
 	return(-1);

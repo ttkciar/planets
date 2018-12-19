@@ -1,19 +1,20 @@
+#include <zconf.h>
 #include "planets.h"
 
-planet_hdr(out)
-FILE *out;
+void
+planet_hdr(FILE *out)
 {
 	fputs(" # Name       Empire               ( X,   Y)  Util  Prod   Def  Tech  Reserve\n", out);
 }
 
-ship_hdr(out)
-FILE *out;
+void
+ship_hdr(FILE *out)
 {
 	fputs("Type Name         Shp ( X,   Y) Status             Speed  Distance   Points\n", out);
 }
 
-pr_planet(out, i)
-FILE *out;
+void
+pr_planet(FILE *out, int i)
 {
 	fprintf(out, "%2d %-10.10s ", i, game.planets[i].p_name);
 	fprintf(out, "%-20.20s ", game.planets[i].p_emp == -1 ?
@@ -27,8 +28,8 @@ FILE *out;
 		game.planets[i].p_res );
 }
 
-pr_ship(out, i)
-FILE *out;
+void
+pr_ship(FILE *out, int i)
 {
 	struct ship *s = &game.ships[i];
 	char rbuf[30];
@@ -61,10 +62,11 @@ FILE *out;
 		s->s_points);
 }
 
-pr_scan(i){
+void
+pr_scan(int i) {
 	struct ship *s = &game.ships[i];
 	char rbuf[30];
-	float sx, sy, range;
+	float sx, sy, range = 0.0;
 
 	lseek(fd, SHIP(0), 0);
 	read(fd, game.ships, sizeof game.ships);
@@ -96,14 +98,14 @@ pr_scan(i){
 	}
 	else {
 		if (s->s_dest >= 0)
-			return(0);
+			return;
 		else
 			sprintf(rbuf, "Rest");
 	}
 
 	if (s->s_mode)
 		printf("%-8.8s (%2.0f, %3.0f)  %-20.20s   %5d    %6.2f\n",
-			(s->s_type == 's') ? "Scout" : ((s->s_type == 'b') ? 
+			(s->s_type == 's') ? "Scout" : ((s->s_type == 'b') ?
 				"Battle" : "Colony"),
 			s->s_x,
 			s->s_y,
@@ -119,6 +121,7 @@ pr_scan(i){
 			rbuf);
 }
 
+void
 scan_hdr()
 {
 	puts("Type     ( X,   Y)  Status                 Speed     Range");
