@@ -163,12 +163,20 @@ do_enroll() {
 			return(1);
 		}
 		emp = atoi(av[2]);
-		for(i=0; i < NUM_PLANETS; ++i)
-			if (game.planets[i].p_emp == emp) game.planets[i].p_emp = -1;
+		for(i=0; i < NUM_PLANETS; ++i) {
+			if (game.planets[i].p_emp == emp) {
+				game.planets[i].p_emp = -1;
+			}
+		}
 		uid_enroll = atoi(av[1]);
-		for(i=0; i < NUM_EMPIRES; ++i)
-					if (game.empires[i].e_uid == uid_enroll) break;
-		if (i != NUM_EMPIRES) game.empires[i].e_uid = -1;
+		for(i=0; i < NUM_EMPIRES; ++i) {
+			if (game.empires[i].e_uid == uid_enroll) {
+				break;
+			}
+		}
+		if (i != NUM_EMPIRES) {
+			game.empires[i].e_uid = -1;
+		}
 		if (emp != -1) {
 			game.empires[emp].e_uid = uid_enroll;
 			i = atoi(av[3]);
@@ -183,10 +191,12 @@ do_enroll() {
 		}
 	} else {
 		for(i=0; i < NUM_EMPIRES; ++i) {
-			if (game.empires[i].e_uid == -1)
+			if (game.empires[i].e_uid == -1) {
 				unused[utop++] = i;
-			if (game.empires[i].e_uid == uid)
+			}
+			if (game.empires[i].e_uid == uid) {
 				break;
+			}
 		}
 
 		if (!utop) {
@@ -205,15 +215,17 @@ do_enroll() {
 
 		game.empires[emp].e_uid = uid;
 
-		for(num=0, i=0; i < NUM_EMPIRES; ++i)
+		for(num=0, i=0; i < NUM_EMPIRES; ++i) {
 			if (game.empires[i].e_uid != -1) ++num;
+		}
 
 		game.hdr.max_fleet = NUM_SHIPS / ((!num) ? 1 : num);
 
 		utop=0;
 		for(i=0; i < NUM_PLANETS; ++i) {
-			if (game.planets[i].p_emp == -1)
+			if (game.planets[i].p_emp == -1) {
 				unused[utop++] = i;
+			}
 		}
 
 		if (!utop) {
@@ -236,15 +248,22 @@ do_enroll() {
 		char good = 1;
 
 		for (j=0; j<len; j++) {
-			if (buf[j] < 32) good = 0;
+			if (buf[j] < 32) {
+				good = 0;
+			}
 		}
-		if (good) break;
+		if (good) {
+			break;
+		}
 	}
-	if (c == NULL) buf[0] = 0;
+	if (c == NULL) {
+		buf[0] = 0;
+	}
 	strcpy(game.empires[emp].e_name, buf);
-	if (verbose)
+	if (verbose) {
 		printf("The %s empire has been created on planet #%d.\n",
 			game.empires[emp].e_name, i);
+	}
 	game.planets[i].p_res  = rnd(1000) + 4000;
 	if (game.planets[i].p_def == 0) {
 		game.planets[i].p_def  += rnd(5) + 1;
