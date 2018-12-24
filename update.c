@@ -1,5 +1,3 @@
-#include <memory.h>
-#include <mhash.h>
 #include "planets.h"
 
 int lock(int);

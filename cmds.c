@@ -1,5 +1,3 @@
-#include <memory.h>
-#include <mhash.h>
 #include "planets.h"
 
 int lock(int);
@@ -370,10 +368,11 @@ do_max_fleet() {
 /*  And for completeness... */
 int
 do_echo() {
-	char **a = av+1, newline = 1;
+	char **a = av+1;
+	bool newLine = true;
 
 	if (!strcmp(av[1], "-n")) {
-		newline = 0;
+		newline = false;
 		++a;
 	}
 	while (*a) printf("%s ", *a++);

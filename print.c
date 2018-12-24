@@ -1,4 +1,3 @@
-#include <zconf.h>
 #include "planets.h"
 
 void

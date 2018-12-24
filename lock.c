@@ -1,5 +1,3 @@
-#include <fcntl.h>
-#include <zconf.h>
 #include "planets.h"
 
 static void (*sigint)();

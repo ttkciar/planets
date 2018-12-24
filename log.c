@@ -1,10 +1,5 @@
-#include <fcntl.h>
-#include <zconf.h>
-#include <memory.h>
-#include <mhash.h>
 #include "planets.h"
 
-int instr(char *srch, char *str);
 void Puts(char *s);
 
 /*
@@ -40,7 +35,7 @@ do_log() {
 	while( fgets(buf, 80, fp) ) {
 		if (ac == 1)
 			printf("%s", buf);
-		else if (instr(srch, buf)) {
+		else if (strstr(buf, srch)) {
 			putchar('\n');
 			printf("%s", buf);
 			if (!fgets(buf, 80, fp)) break;
@@ -53,29 +48,6 @@ do_log() {
 
 	fclose(fp);
 	return(0);
-}
-
-/*
- * Instr() this returns true if srch is in str.
- */
-int
-instr(char *srch, char *str)
-{
-	register char *t = srch, *start;
-	while( *str ) {
-		if (*str == *t && *t) {
-			start = str;
-			while(*str == *t && *t) {
-				++str;
-				++t;
-			}
-			if (!*t) return 1;
-			str = start;
-			t = srch; 
-		}
-		++str;
-	}
-	return 0;
 }
 
 /*

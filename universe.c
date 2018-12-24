@@ -1,7 +1,3 @@
-#include <string.h>
-#include <zconf.h>
-#include <fcntl.h>
-#include <stdlib.h>
 #include "planets.h"
 
 #define PRINT_COM	"/bin/print -r=%s -"

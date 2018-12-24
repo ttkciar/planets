@@ -1,4 +1,3 @@
-#include <mhash.h>
 #include "planets.h"
 
 struct score {

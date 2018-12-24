@@ -210,7 +210,7 @@ conflict (int shipno, int planetno)
 				if (s2->s_points <= 0) {
 					s2->s_points = 0;
 					logmsg(s2->s_emp, "Defending battleship #%d destroyed!\n",
-								def_ships[i]);
+								def_ships[j]);
 					s2->s_emp = -1;
 					def_ships[j] = -1;
 				} else {

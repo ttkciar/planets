@@ -1,8 +1,19 @@
-#include <stdio.h>
-#include <math.h>
-#include <signal.h>
-#include <setjmp.h>
 #include <ctype.h>
+#include <curses.h>
+#include <fcntl.h>
+#include <math.h>
+#include <pwd.h>
+#include <setjmp.h>
+#include <sgtty.h>
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <term.h>
+#include <termcap.h>
+#include <unistd.h>
 
 extern char *playdir, *helpdir;
 extern int master_uid;
@@ -102,14 +113,14 @@ int fd;
 #define COST_STEALTH	50
 #define COST_TECH(x)	(100*(x))
 
-#define COST_S_DEF(amt,p)		((amt) * (50  - p.p_tech/2))
-#define COST_S_STEALTH(amt,p)	((amt) * (50  - p.p_tech/2))
-#define COST_S_TECH(amt,p)		((amt) * (100 - p.p_tech/2))
+#define COST_S_DEF(amt,p)		((amt) * (50  - (p).p_tech/2))
+#define COST_S_STEALTH(amt,p)	((amt) * (50  - (p).p_tech/2))
+#define COST_S_TECH(amt,p)		((amt) * (100 - (p).p_tech/2))
 
-#define PLANET_OUTPUT(p)  ((p->p_prod-(p->p_def/5.0))*((p->p_tech+0.5)/2.0))
+#define PLANET_OUTPUT(p)  (((p)->p_prod-((p)->p_def/5.0))*(((p)->p_tech+0.5)/2.0))
 
 #define SQR(x)			((x)*(x))
-#define DIST(x1,y1,x2,y2)	(float)sqrt(SQR(x1-x2)+SQR(y1-y2))
+#define DIST(x1,y1,x2,y2)	(float)sqrt(SQR((x1)-(x2))+SQR((y1)-(y2)))
 #define ABS(x) 			((x) > 0 ? (x) : -(x))
 
 #define MAX_X 60

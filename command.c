@@ -1,7 +1,3 @@
-#include <memory.h>
-#include <zconf.h>
-#include <mhash.h>
-#include <fcntl.h>
 #include "planets.h"
 
 struct cmd{

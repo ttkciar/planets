@@ -1,5 +1,3 @@
-#include <zconf.h>
-#include <stdlib.h>
 #include "planets.h"
 
 void checklog();

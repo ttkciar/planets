@@ -1,7 +1,4 @@
 #include "planets.h"
-#include <pwd.h>
-#include <zconf.h>
-#include <mhash.h>
 
 int init_log(int);
 void init_tele(int);
@@ -273,7 +270,7 @@ do_un_nuke() {
 	lseek(fd, PLANET(n), 0);
 	read(fd, &game.planets[n], sizeof(struct planet) );
 	strcpy(game.planets[n].p_name, av[2]);
-	game.planets[n].p_emp = atoi(av[3]);
+	game.planets[n].p_emp = (char) atoi(av[3]);
 	game.planets[n].p_x = atoi(av[4]);
 	game.planets[n].p_y = atoi(av[5]);
 	game.planets[n].p_util = atoi(av[6]);

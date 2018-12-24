@@ -9,9 +9,6 @@
  * 2018-12-09 Ported to C11 by Bill Karwin
  */
 
-#include <fcntl.h>
-#include <mhash.h>
-#include <sys/stat.h>
 #include "planets.h"
 
 void checklog();

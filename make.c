@@ -1,4 +1,3 @@
-#include <mhash.h>
 #include "planets.h"
 
 int lock(int);
@@ -97,7 +96,7 @@ do_make() {
 	game.ships[i].s_type = type;
 	game.ships[i].s_x = game.ships[i].s_dest_x = game.planets[pnum].p_x;
 	game.ships[i].s_y = game.ships[i].s_dest_y = game.planets[pnum].p_y;
-	game.ships[i].s_emp = emp;
+	game.ships[i].s_emp = (char) emp;
 	game.ships[i].s_points  = amt;
 	game.ships[i].s_tech = game.planets[pnum].p_tech;
 	game.ships[i].s_mode = 0;

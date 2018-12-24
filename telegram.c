@@ -1,6 +1,3 @@
-#include <zconf.h>
-#include <fcntl.h>
-#include <memory.h>
 #include "planets.h"
 
 char buf[BUFSIZ];

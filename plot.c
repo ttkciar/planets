@@ -1,9 +1,5 @@
 #include "planets.h"
 
-#include <sgtty.h>
-#include <mhash.h>
-#include <termcap.h>
-
 #define xnputs(s,n) tputs(s, n, xputc)
 #define xputs(s)    tputs(s, 1, xputc)
 #define cls()       xnputs(CL, LI)
@@ -12,14 +8,14 @@
 extern char **environ;
 
 struct sgttyb _tty;
-int xputc();
+int xputc(char);
 
 static char tbuf[512];
 static char *CL, *CM;
 static int CO, LI;
 
 int
-initscr()
+initscreen()
 {
 	char *tptr;
 	char *tbufptr, *pc;
@@ -57,14 +53,14 @@ do_plot()
 	register struct planet *p;
 
 	if (ac-1) {
-		center = atoi(av[1]);
+		center = (char) atoi(av[1]);
 		if (center < 0 || center >= NUM_PLANETS) {
 			puts("Invalid planet number");
 			return(1);
 		}
 	}
 	else center = (char) ((emp == -1) ? 0 : game.empires[emp].e_first);
-	if (!flag) flag = initscr();  /* from csr.h, NOT curses.h */
+	if (!flag) flag = (char) initscreen();  /* from csr.h, NOT curses.h */
 	if (!flag) {
 		puts ("Terminal must have clearscreen and cursor movement");
 		return(1);
@@ -110,7 +106,7 @@ do_plot()
 }
 
 int
-xputc(c)  /* an actual function for tputs */
+xputc(char c)  /* an actual function for tputs */
 {
 	putchar(c);
 	return 0;

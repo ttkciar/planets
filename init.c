@@ -1,5 +1,3 @@
-#include <zconf.h>
-#include <mhash.h>
 #include "planets.h"
 
 int init_log(int);
