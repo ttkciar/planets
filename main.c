@@ -16,95 +16,144 @@ void commands();
 int do_init();
 void init_tele(int);
 int read_tele(int, char);
+void start_datafile();
+void start_emp();
+void start_identity();
+void start_mail();
+void start_options(int, char **);
+void start_system();
 void unlock();
 
 char obuf[BUFSIZ];
 
-// TODO make master_uid configurable
-int master_uid = 97;
-// TODO make playdir configurable
-char *playdir;
-// TODO make helpdir configurable
-char *helpdir = "/usr/games/lib/planet_help";
+uid_t master_uid=0, real_uid;
+char *config_file = "/etc/planets.conf";
+char *playdir = "/var/lib/planets";
+char *helpdir = "/var/lib/planets/help";
 
 int
 main(int argc, char **argv)
 {
-	int i, master = 0;
 
-	if (read(0, "",0) == -1 || write(1,"",0)==-1) exit(1);
+    start_system();
+    start_options(argc, argv);
+    start_identity();
+    start_datafile();
+    start_emp();
+    start_mail();
 
-	signal(SIGINT, SIG_IGN);
-	signal(SIGQUIT, SIG_IGN);
+    commands();
+}
 
-	if (!strcmp(argv[0], "turbo-planets"))
- 		playdir = "/c/u/clp/planets/turbo";
-	else
- 		playdir = "/b/e/games/planets/play";
+void
+start_system() {
+    if (read(0, "", 0) == -1 || write(1, "", 0) == -1) {
+        exit(1);
+    }
+    signal(SIGINT, SIG_IGN);
+    signal(SIGQUIT, SIG_IGN);
+    setbuf(stdout, obuf);
+    home = getenv("HOME");
+    umask(0000);
+    seed = getpid();
+}
 
-	if (chdir(playdir)) {
-		puts("cannot chdir() into play directory");
-		exit(1);
-	}
+void
+start_options(int argc, char **argv) {
+    FILE *fp;
+    int flag;
 
-	setbuf(stdout, obuf);
+    uid = real_uid = getuid();
 
-	home = getenv("HOME");
+    if ((fp = fopen(config_file, "r")) != NULL) {
+        char *param="", *value="";
+        while (fscanf(fp, "%s = %s", param, value) > 0) {
+            if (!strcmp(param, "master_uid")) {
+                game_config.master_uid = (uid_t) strtol(value, NULL, 10);
+            } else if (!strcmp(param, "playdir")) {
+                game_config.playdir = strdup(value);
+            }
+        }
+        fclose(fp);
+    }
 
-	umask(0000);
+    while ((flag = getopt(argc, argv, "d:u:")) != -1) {
+        switch (flag) {
+            case 'd':
+                playdir = optarg;
+                break;
+            case 'u':
+                uid = (uid_t) strtol(optarg, NULL, 10);
+                break;
+            default:
+                exit(1);
+        }
+    }
+    argc -= optind;
+    argv += optind;
+}
 
-	seed = getpid();
-	uid = getuid();
-	if (MASTER) {
-		master = 1;
-		puts("You are in Ultra-Mode");
-		if (argc == 2) {
-			printf("Uid set to %d\n", uid = atoi(argv[1]));
-			fflush(stdout);
-		}
-	}
+void
+start_identity() {
+    if (MASTER) {
+        puts("You are in administrator mode");
+        if (uid != master_uid) {
+            printf("Uid set to %d\n", uid);
+            fflush(stdout);
+        }
+    }
+    setgid(getgid());
+}
 
-	fd = open(DATA_FILE, 2);
-	if (fd < 0) {
-		if (MASTER) {
-			unlock();
-			close(creat(DATA_FILE, 0660));
-			fd = open(DATA_FILE, 2);
-			if (fd < 0) {
-				puts("Cannot create datafile");
-				fflush(stdout);
-				exit(0);
-			}
-			puts("Creating Data File");
-			fflush(stdout);
-			do_init();
-		}
-		else {
-			puts("Cannot open data file");
-			fflush(stdout);
-			exit(0);
-		}
-	}
+void
+start_datafile() {
+    if (chdir(playdir)) {
+        perror(playdir);
+        exit(1);
+    }
+    fd = open(DATA_FILE, 2);
+    if (fd < 0) {
+        if (MASTER) {
+            unlock();
+            close(creat(DATA_FILE, 0660));
+            fd = open(DATA_FILE, 2);
+            if (fd < 0) {
+                puts("Cannot create datafile");
+                fflush(stdout);
+                exit(0);
+            }
+            puts("Creating Data File");
+            fflush(stdout);
+            do_init();
+        }
+        else {
+            puts("Cannot open data file");
+            fflush(stdout);
+            exit(0);
+        }
+    }
+    lseek(fd, 0L, 0);
+    read(fd, &game, sizeof(game));
+}
 
-	setgid(getgid());
-	lseek(fd, 0L, 0);
-	read(fd, &game, sizeof(game));
+void
+start_emp() {
+    int i;
+    emp = -1;
+    for(i=0; i < NUM_EMPIRES; ++i) {
+        if (game.empires[i].e_uid == uid) {
+            emp = i;
+            break;
+        }
+    }
+}
 
-	emp = -1;
-	for(i=0; i < NUM_EMPIRES; ++i) {
-		if (game.empires[i].e_uid == uid) {
-			emp = i;
-			break;
-		}
-	}
-
-	if ((MASTER || emp != -1)) {  /* temporary, we want to read other's mail */
-// 	if (!master && (MASTER || emp != -1)) { /* Don't read mail if MASTER is */
-		read_tele(emp, 0);                  /* on as someone else           */
-		if (emp != -1) checklog();
-	}
-
-	commands();
+void
+start_mail() {
+    if (uid != master_uid || emp != -1) {
+        read_tele(emp, 0);
+        checklog();
+    }
 }
 
 /* from rogue */
@@ -112,5 +161,5 @@ main(int argc, char **argv)
 
 int
 rnd(int n) {
-	return (int) (n <= 0 ? 0 : RN % n);
+    return (int) (n <= 0 ? 0 : RN % n);
 }

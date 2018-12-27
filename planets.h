@@ -16,8 +16,8 @@
 #include <unistd.h>
 
 extern char *playdir, *helpdir;
-extern int master_uid;
-#define MASTER (uid == master_uid)
+extern uid_t master_uid, real_uid;
+#define MASTER (real_uid == master_uid)
 
 #define DATA_FILE "data"
 
@@ -73,6 +73,11 @@ struct {
 	struct ship ships[NUM_SHIPS];
 } game;
 
+struct {
+	char *playdir;
+	uid_t master_uid;
+} game_config;
+
 #define HISTORY 23
 char *history[HISTORY];
 int comnum;
@@ -95,7 +100,8 @@ int ac;
 char verbose, *home;
 long time();
 long seed;
-int emp, uid;
+int emp;
+uid_t uid;
 void ctrl_c(int);
 int fd;
 
