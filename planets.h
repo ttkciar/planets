@@ -1,6 +1,7 @@
 #include <ctype.h>
 #include <curses.h>
 #include <fcntl.h>
+#include <getopt.h>
 #include <math.h>
 #include <pwd.h>
 #include <setjmp.h>
@@ -15,9 +16,7 @@
 #include <termcap.h>
 #include <unistd.h>
 
-extern char *playdir, *helpdir;
-extern uid_t master_uid, real_uid;
-#define MASTER (real_uid == master_uid)
+#define MASTER (game_config.is_master)
 
 #define DATA_FILE "data"
 
@@ -73,9 +72,15 @@ struct {
 	struct ship ships[NUM_SHIPS];
 } game;
 
+#define DEFAULT_CONFIG "/usr/local/etc/planets.conf"
+#define DEFAULT_PLAYDIR "/usr/local/var/planets"
+#define DEFAULT_HELPDIR "/usr/local/var/planets/help"
+
 struct {
 	char *playdir;
+	char *helpdir;
 	uid_t master_uid;
+	bool is_master;
 } game_config;
 
 #define HISTORY 23
@@ -99,7 +104,7 @@ int ac;
 
 char verbose, *home;
 long time();
-long seed;
+uint64_t seed;
 int emp;
 uid_t uid;
 void ctrl_c(int);

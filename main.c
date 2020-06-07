@@ -27,9 +27,6 @@ void unlock();
 char obuf[BUFSIZ];
 
 uid_t master_uid=0, real_uid;
-char *config_file = "/etc/planets.conf";
-char *playdir = "/var/lib/planets";
-char *helpdir = "/var/lib/planets/help";
 
 int
 main(int argc, char **argv)
@@ -62,35 +59,68 @@ void
 start_options(int argc, char **argv) {
     FILE *fp;
     int flag;
+    char *config_file;
+    int exit_value = 1;
 
     uid = real_uid = getuid();
 
+    config_file = getenv("PLANETS_CONFIG");
+    if (!config_file) {
+        config_file = DEFAULT_CONFIG;
+    }
+    game_config.playdir = DEFAULT_PLAYDIR;
+    game_config.helpdir = DEFAULT_HELPDIR;
+
     if ((fp = fopen(config_file, "r")) != NULL) {
-        char *param="", *value="";
+        char param[20], value[100];
         while (fscanf(fp, "%s = %s", param, value) > 0) {
             if (!strcmp(param, "master_uid")) {
                 game_config.master_uid = (uid_t) strtol(value, NULL, 10);
             } else if (!strcmp(param, "playdir")) {
                 game_config.playdir = strdup(value);
+            } else if (!strcmp(param, "helpdir")) {
+                game_config.helpdir = strdup(value);
             }
         }
         fclose(fp);
     }
 
-    while ((flag = getopt(argc, argv, "d:u:")) != -1) {
+    while (1) {
+        static struct option long_options[] = {
+                {"help", no_argument, 0, 'h'},
+                {"helpdir", required_argument, 0, 'H'},
+                {"master-uid", required_argument, 0, 'm'},
+                {"playdir", required_argument, 0, 'p'},
+                {0, 0, 0, 0}
+        };
+        int option_index = 0;
+        flag = getopt_long(argc, argv, "hHmp", long_options, &option_index);
+        if (flag == -1) {
+            break;
+        }
         switch (flag) {
-            case 'd':
-                playdir = optarg;
+            case 0:
                 break;
-            case 'u':
-                uid = (uid_t) strtol(optarg, NULL, 10);
+            case 'H':
+                game_config.helpdir = optarg;
                 break;
+            case 'm':
+                game_config.master_uid = (uid_t) strtol(optarg, NULL, 10);
+                break;
+            case 'p':
+                game_config.playdir = optarg;
+                break;
+            case 'h':
+                exit_value = 0;
+            case '?':
+                printf("Get help!\n");
+                fflush(stdout);
+                exit(exit_value);
             default:
-                exit(1);
+                abort();
         }
     }
-    argc -= optind;
-    argv += optind;
+    game_config.is_master = (game_config.master_uid == real_uid);
 }
 
 void
@@ -107,8 +137,8 @@ start_identity() {
 
 void
 start_datafile() {
-    if (chdir(playdir)) {
-        perror(playdir);
+    if (chdir(game_config.playdir)) {
+        perror(game_config.playdir);
         exit(1);
     }
     fd = open(DATA_FILE, 2);
