@@ -28,6 +28,10 @@ check_turn() {
 		++beenhere;
 	}
 
+	if (game.hdr.up_time == 0) {
+	    puts("Game is not initialized, aborting.");
+	    return 1;
+	}
 	if ((l = (int)((now - game.hdr.up_last) / game.hdr.up_time)) > 0) {
 		if ( lock(0) ) {
 			fflush(stdout);

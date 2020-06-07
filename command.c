@@ -89,7 +89,9 @@ commands()
 	atop = 0;
 	verbose = 1;
 	comnum = 0;
-	check_turn();
+	if (check_turn() != 0) {
+	    exit(1);
+	}
 
 	if (MASTER) strcpy(prompt, "=> ");
 	else strcpy(prompt, "> ");
