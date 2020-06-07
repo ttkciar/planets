@@ -212,17 +212,21 @@ execute(char *com)
 		return 0;
 
 	out = stdout;
-	if (av[ac-2][0] == '>' && !av[ac-2][1]) {
-		char file[80];
-		if (av[ac-1][0] != '/')
-			sprintf (file, "%s/%s", home, av[ac-1]);
-		else strcpy(file, av[ac-1]);
-		if ((out = fopen(file, "w")) == NULL) {
-			printf("cannot open '%s' for writing\n", file);
-			return 1;
-		}
-		ac -= 2;
-	}
+    /* append "> filename" after any command to save output to that file */
+    if (ac > 1) {
+        if (!strcmp(av[ac - 2], ">")) {
+            char file[80];
+            if (av[ac - 1][0] != '/')
+                sprintf (file, "%s/%s", home, av[ac - 1]);
+            else
+                strcpy(file, av[ac - 1]);
+            if ((out = fopen(file, "w")) == NULL) {
+                printf("cannot open '%s' for writing\n", file);
+                return 1;
+            }
+            ac -= 2;
+        }
+    }
 
 	for(i=0; i < NUMCMDS; ++i)
 		if (!strcmp(cmds[i].str, av[0])) {
@@ -309,7 +313,7 @@ do_help() {
 	}
 	else
 		while( *++argv ) {
-			sprintf(buf, "%s/%s", helpdir, *argv );
+			sprintf(buf, "%s/%s", game_config.helpdir, *argv );
 
 			fd = open(buf, 0);
 			if (fd < 0)
@@ -328,7 +332,7 @@ do_mark() {
 	if (!lock(1)) return 1;
 	lseek(fd, 0L, 0);
 	read(fd, &game.hdr, sizeof(game.hdr));
-	game.hdr.up_last = time();
+	game.hdr.up_last = time(NULL);
 	lseek(fd, 0L, 0);
 	write(fd, &game.hdr, sizeof(game.hdr));
 	unlock();
