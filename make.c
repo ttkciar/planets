@@ -16,8 +16,8 @@ do_make() {
 		return(1);
 	}
 
-	pnum = atoi(av[1]);
-	amt = av[3] ? atoi(av[3]) : 0;
+	pnum = (int) strtol(av[1], NULL, 10);
+	amt = av[3] ? (int) strtol(av[3], NULL, 10) : 0;
 	if (amt < 0) amt = 0;
 
 	type = av[2][0];
@@ -94,14 +94,14 @@ do_make() {
 		return(1);
 	}
 	game.ships[i].s_type = type;
-	game.ships[i].s_x = game.ships[i].s_dest_x = game.planets[pnum].p_x;
-	game.ships[i].s_y = game.ships[i].s_dest_y = game.planets[pnum].p_y;
+	game.ships[i].s_x = game.ships[i].s_dest_x = (float) game.planets[pnum].p_x;
+	game.ships[i].s_y = game.ships[i].s_dest_y = (float) game.planets[pnum].p_y;
 	game.ships[i].s_emp = (char) emp;
 	game.ships[i].s_points  = amt;
 	game.ships[i].s_tech = game.planets[pnum].p_tech;
 	game.ships[i].s_mode = 0;
 	game.ships[i].s_dest = pnum;
-	game.ships[i].s_dist = 0.0;
+	game.ships[i].s_dist = (float) 0.0;
 	game.ships[i].s_seen = -1;
 	strcpy(game.ships[i].s_name, name);
 	lseek(fd, 0L, 0);

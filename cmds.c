@@ -89,7 +89,7 @@ do_interval() {
 		printf("time interval is %ld minutes\n", game.hdr.up_time / 60L);
 	else if (ac == 2) {
 		printf("new interval is %ld seconds\n",
-			game.hdr.up_time = atoi(av[1]) * 60L );
+			game.hdr.up_time = strtol(av[1], NULL, 10) * 60L );
 	}
 	lseek(fd, 0L, 0);
 	write(fd, &game.hdr, sizeof(game.hdr));
@@ -118,7 +118,7 @@ do_next() {
 	lseek(fd, 0L, 0);
 	read(fd, &game.hdr, sizeof( game.hdr ) );
 
-	sec = game.hdr.up_last + game.hdr.up_time - time();
+	sec = game.hdr.up_last + game.hdr.up_time - time(NULL);
 	min = sec / 60;
 	hour = 0;
 	sec %= 60;
@@ -310,7 +310,7 @@ hist_sub(char *s, char *d)
 
 				while (isdigit(*s)) *n++ = *s++;
 				*n = 0;
-				num = atoi(nbuf);
+				num = (int) strtol(nbuf, NULL, 10);
 				if (num > (comnum - 1) || num < (comnum - HISTORY)) {
 					printf("%d: event not found\n", num);
 					return(-1);
@@ -358,7 +358,7 @@ do_max_fleet() {
 	if (!lock(1)) return 1;
 	lseek(fd, 0L, 0);
 	read(fd, &game.hdr, sizeof(game.hdr));
-	game.hdr.max_fleet = atoi(av[1]);
+	game.hdr.max_fleet = (int) strtol(av[1], NULL, 10);
 	lseek(fd, 0L, 0);
 	write(fd, &game.hdr, sizeof(game.hdr));
 	unlock();

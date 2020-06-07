@@ -14,7 +14,7 @@ do_update() {
 		return(1);
 	}
 
-	shipno = atoi(av[2]);
+	shipno = (int) strtol(av[2], NULL, 10);
 	if (shipno < 0 || shipno >= NUM_SHIPS) {
 		puts("no such ship");
 		return(1);
@@ -60,7 +60,7 @@ do_update() {
 			s->s_points = 0;
 		}
 		else {
-			amt = atoi(av[3]);
+			amt = (int) strtol(av[3], NULL, 10);
 			if (amt > 0 && amt > game.planets[s->s_dest].p_res) {
 				puts("Planet does not have enough resources");
 				unlock();
@@ -83,7 +83,7 @@ do_update() {
 			unlock();
 			return(1);
 		}
-		if ((amt = atoi(av[3])) <= 0) {
+		if ((amt = (int) strtol(av[3], NULL, 10)) <= 0) {
 			puts("Defense can only be increased.");
 			unlock();
 			return(1);
@@ -110,7 +110,7 @@ do_update() {
 			unlock();
 			return(1);
 		}
-		if ((amt = atoi(av[3])) <= 0) {
+		if ((amt = (int) strtol(av[3], NULL, 10)) <= 0) {
 			printf("Stealth can only be increased.");
 			unlock();
 			return(1);
@@ -133,7 +133,7 @@ do_update() {
 	else if (av[1][0] == 't') {
 		int cost;
 
-		if ((amt = atoi(av[3])) <= 0) {
+		if ((amt = (int) strtol(av[3], NULL, 10)) <= 0) {
 			printf("Technology can only be increased.");
 			unlock();
 			return(1);

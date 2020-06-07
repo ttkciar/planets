@@ -7,7 +7,7 @@ int
 do_build() {
 	int pnum, amt;
 	struct planet *p;
-	char maxmode = !strcmp("max",av[0]);
+	char maxmode = (char) !strcmp("max",av[0]);
 	char allmode = 0;
 
 	if (!maxmode && ac != 4) {
@@ -20,8 +20,8 @@ do_build() {
 		return(1);
 	}
 	if (!strcmp(av[2], "*")) allmode = 1;
-	pnum = (allmode) ? 0 : atoi(av[2]);
-	amt = atoi(av[3]);
+	pnum = (allmode) ? 0 : (int) strtol(av[2], NULL, 10);
+	amt = (int) strtol(av[3], NULL, 10);
 	if (amt < 0) {
 		puts("Cannot increase by a negative amount");
 		return(1);

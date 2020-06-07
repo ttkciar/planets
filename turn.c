@@ -15,7 +15,7 @@ int num_def_ships;
 int
 check_turn() {
 	int l;
-	long now = time();
+	long now = time(NULL);
 	static int beenhere = 0;
 	static long lasttime;
 	int tabort = 0;

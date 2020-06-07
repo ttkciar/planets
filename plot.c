@@ -54,7 +54,7 @@ do_plot()
 	register struct planet *p;
 
 	if (ac-1) {
-		center = atoi(av[1]);
+		center = (int) strtol(av[1], NULL, 10);
 		if (center < 0 || center >= NUM_PLANETS) {
 			puts("Invalid planet number");
 			return(1);

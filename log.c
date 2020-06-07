@@ -11,11 +11,11 @@ do_log() {
 	char buf[80], srch[40];
 	int n;
 	if (ac == 2) {
-		n = atoi(av[1]);
+		n = (int) strtol(av[1], NULL, 10);
 		sprintf(srch, "planet #%02d", n);
 	}
 	else if (ac == 3 && !strcmp(av[1], "-s")) {
-		n = atoi(av[2]);
+		n = (int) strtol(av[2], NULL, 10);
 		sprintf(srch, "Ship #%02d", n);
 	}
 	else if (ac != 1) {

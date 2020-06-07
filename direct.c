@@ -12,7 +12,7 @@ do_direct() {
 		puts("usage: direct ship_num < planet_num | x y >");
 		return(1);
 	}
-	shpno = atoi(av[1]);
+	shpno = (int) strtol(av[1], NULL, 10);
 	if (shpno < 0 || shpno >= NUM_SHIPS) {
 		printf("%d not a valid ship number\n", shpno);
 		return(1);
@@ -29,7 +29,7 @@ do_direct() {
 	s = &game.ships[shpno];
 
 	if (ac == 3) {
-		pnum = atoi(av[2]);
+		pnum = (int) strtol(av[2], NULL, 10);
 		if (pnum < 0 || pnum >= NUM_PLANETS) {
 			printf("%d not a valid planet number\n", pnum);
 			unlock();
@@ -37,11 +37,11 @@ do_direct() {
 		}
 		s->s_dest = pnum;
 		s->s_mode = 1;
-		s->s_dest_x = game.planets[pnum].p_x;
-		s->s_dest_y = game.planets[pnum].p_y;
+		s->s_dest_x = (float) game.planets[pnum].p_x;
+		s->s_dest_y = (float) game.planets[pnum].p_y;
 		s->s_dist = DIST( s->s_x, s->s_y, s->s_dest_x, s->s_dest_y );
 	} else {
-		int x = atoi(av[2]), y = atoi(av[3]);
+		int x = (int) strtol(av[2], NULL, 10), y = (int) strtol(av[3], NULL, 10);
 		if (x < 0 || x >= MAX_X || y < 0 || y >= MAX_Y) {
 			puts("Cannot direct a ship out of known space.");
 			unlock();
@@ -49,8 +49,8 @@ do_direct() {
 		}
 		s->s_dest = -1;
 		s->s_mode = 2;
-		s->s_dest_x = x;
-		s->s_dest_y = y;
+		s->s_dest_x = (float) x;
+		s->s_dest_y = (float) y;
 		s->s_dist = DIST(s->s_x, s->s_y, s->s_dest_x, s->s_dest_y);
 	}
 	lseek(fd, SHIP(shpno), 0);

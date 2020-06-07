@@ -126,7 +126,7 @@ do_init() {
 		game.ships[i].s_name[0] = 0;
 	}
 
-	game.hdr.up_last = time();
+	game.hdr.up_last = time(NULL);
 	game.hdr.up_time = 21600L;   /* six - hour default */
 	game.hdr.up_num = 0;
 	game.hdr.max_fleet = NUM_SHIPS;
@@ -155,18 +155,18 @@ do_enroll() {
 	if (MASTER) {
 		int uid_enroll;
 
-		if (ac < 3 || (((emp = atoi(av[2])) != -1) && ac == 3) || ac > 4) {
+		if (ac < 3 || (((emp = (int) strtol(av[2], NULL, 10)) != -1) && ac == 3) || ac > 4) {
 			puts("Usage: enroll <uid> <empire> <planet>");
 			unlock();
 			return(1);
 		}
-		emp = atoi(av[2]);
+		emp = (int) strtol(av[2], NULL, 10);
 		for(i=0; i < NUM_PLANETS; ++i) {
 			if (game.planets[i].p_emp == emp) {
 				game.planets[i].p_emp = -1;
 			}
 		}
-		uid_enroll = atoi(av[1]);
+		uid_enroll = (int) strtol(av[1], NULL, 10);
 		for(i=0; i < NUM_EMPIRES; ++i) {
 			if (game.empires[i].e_uid == uid_enroll) {
 				break;
@@ -177,7 +177,7 @@ do_enroll() {
 		}
 		if (emp != -1) {
 			game.empires[emp].e_uid = uid_enroll;
-			i = atoi(av[3]);
+			i = (int) strtol(av[3], NULL, 10);
 			game.empires[emp].e_first = i;
 			game.planets[i].p_emp = (char) emp;
 		}

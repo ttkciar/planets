@@ -249,7 +249,7 @@ telecmds()
 				saveall(tfp);
 				fclose(fp);
 				fseek(tfp, 0L, 2);
-				lastseen = sizeof(long) + ftell(tfp);
+				lastseen = (long) sizeof(long) + ftell(tfp);
 				fseek(tfp, 0L, 0);
 				fp = fopen(tele_file, "w");
 				fwrite(&lastseen, sizeof(long), 1, fp);

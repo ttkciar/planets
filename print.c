@@ -65,7 +65,7 @@ void
 pr_scan(int i) {
 	struct ship *s = &game.ships[i];
 	char rbuf[30];
-	float sx, sy, range = 0.0;
+	float sx, sy, range = (float) 0.0;
 
 	lseek(fd, SHIP(0), 0);
 	read(fd, game.ships, sizeof game.ships);

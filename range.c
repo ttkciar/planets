@@ -22,12 +22,12 @@ do_range() {
 		amt = 10;
 	}
 	else {
-		pnum = atoi(av[1]);
+		pnum = (int) strtol(av[1], NULL, 10);
 		if (pnum < 0 || pnum >= NUM_PLANETS) {
 			puts("Invalid planet number.");
 			return(1);
 		}
-		amt = (ac == 2) ? 10 : atoi(av[2]);
+		amt = (ac == 2) ? 10 : (int) strtol(av[2], NULL, 10);
 		if (amt < 0 || amt >= NUM_PLANETS) {
 			puts("Invalid range.");
 			return(1);

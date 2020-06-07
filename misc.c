@@ -46,7 +46,7 @@ do_planets(FILE *out)
 	lseek(fd, PLANET(0), 0);
 	read(fd, game.planets, (NUM_PLANETS * sizeof(struct planet)) );
 	if (ac == 2) {
-		i = atoi(av[1]);
+		i = (int) strtol(av[1], NULL, 10);
 		if (i < 0 || i >= NUM_PLANETS) {
 			puts("Bad planet number.");
 			return 1;
@@ -77,7 +77,7 @@ do_ship(FILE *out)
 		puts("usage: ship ship_no");
 		return 1;
 	}
-	i = atoi(av[1]);
+	i = (int) strtol(av[1], NULL, 10);
 	if (i < 0 || i >= NUM_SHIPS) {
 		puts("bad ship number");
 		return 1;
@@ -110,7 +110,7 @@ do_fleet(FILE *out)
 		flg = 0;
 	else if (ac == 3 && !strcmp(av[1], "-d")) {
 		flg = 'd';
-		p = atoi(av[2]);
+		p = (int) strtol(av[2], NULL, 10);
 	}
 	else if (ac == 2 && !strcmp(av[1], "-b"))
 		flg = 'b';
@@ -120,7 +120,7 @@ do_fleet(FILE *out)
 		flg = 's';
 	else if (ac == 2) {
 		flg = 0;
-		p = atoi(av[1]);
+		p = (int) strtol(av[1], NULL, 10);
 	}
 	else {
 		puts("usage:");
@@ -168,7 +168,7 @@ do_name()
 	if (ac == 1)
 		puts(game.empires[emp].e_name);
 	else if (ac == 3) {
-		int i = atoi(av[1]);
+		int i = (int) strtol(av[1], NULL, 10);
 
 		if (i < 0 || i >= NUM_PLANETS) {
 			puts("Invalid planet number.");
@@ -190,7 +190,7 @@ do_name()
 		unlock();
 	}
 	else {
-		int i = atoi(av[2]);
+		int i = (int) strtol(av[2], NULL, 10);
 
 		if (i < 0 || i >= NUM_SHIPS) {
 			puts("Invalid ship number.");
@@ -221,8 +221,8 @@ do_dist() {
 		puts("usage: dist planet_num planet_num");
 		return(1);
 	}
-	p1 = atoi(av[1]);
-	p2 = atoi(av[2]);
+	p1 = (int) strtol(av[1], NULL, 10);
+	p2 = (int) strtol(av[2], NULL, 10);
 	if (p1 < 0 || p1 > NUM_PLANETS) {
 		printf("bad planet number %d\n", p1);
 		return 1;
@@ -261,7 +261,7 @@ do_scan() {
 
 int
 do_un_nuke() {
-	int n = atoi(av[1]);
+	int n = (int) strtol(av[1], NULL, 10);
 	if (ac == 1) {
 		puts("usage: planet_num name emp x y util prod def tech res");
 		return 1;
@@ -270,14 +270,14 @@ do_un_nuke() {
 	lseek(fd, PLANET(n), 0);
 	read(fd, &game.planets[n], sizeof(struct planet) );
 	strcpy(game.planets[n].p_name, av[2]);
-	game.planets[n].p_emp = (char) atoi(av[3]);
-	game.planets[n].p_x = atoi(av[4]);
-	game.planets[n].p_y = atoi(av[5]);
-	game.planets[n].p_util = atoi(av[6]);
-	game.planets[n].p_prod = atoi(av[7]);
-	game.planets[n].p_def = atoi(av[8]);
-	game.planets[n].p_tech = atoi(av[9]);
-	game.planets[n].p_res = atoi(av[10]);
+	game.planets[n].p_emp = (char) strtol(av[3], NULL, 10);
+	game.planets[n].p_x = (int) strtol(av[4], NULL, 10);
+	game.planets[n].p_y = (int) strtol(av[5], NULL, 10);
+	game.planets[n].p_util = (int) strtol(av[6], NULL, 10);
+	game.planets[n].p_prod = (int) strtol(av[7], NULL, 10);
+	game.planets[n].p_def = (int) strtol(av[8], NULL, 10);
+	game.planets[n].p_tech = (int) strtol(av[9], NULL, 10);
+	game.planets[n].p_res = (int) strtol(av[10], NULL, 10);
 	lseek(fd, PLANET(n), 0);
 	write(fd, &game.planets[n], sizeof( struct planet) );
 	unlock();
@@ -291,7 +291,7 @@ do_move() {
 		puts("usage: move planet_num newx newy");
 		return 1;
 	}
-	num = atoi(av[1]);
+	num = (int) strtol(av[1], NULL, 10);
 	if (num < 0 || num >= NUM_PLANETS) {
 		puts("bad planet number");
 		return 1;
@@ -299,8 +299,8 @@ do_move() {
 	if (!lock(1)) return 1;
 	lseek(fd, PLANET(num), 0);
 	read(fd, &game.planets[num], sizeof(struct planet) );
-	game.planets[num].p_x = atoi(av[2]);
-	game.planets[num].p_y = atoi(av[3]);
+	game.planets[num].p_x = (int) strtol(av[2], NULL, 10);
+	game.planets[num].p_y = (int) strtol(av[3], NULL, 10);
 	lseek(fd, PLANET(num), 0);
 	write(fd, &game.planets[num], sizeof(struct planet) );
 	unlock();
@@ -342,7 +342,7 @@ do_rename()
 
 	if (!lock(1)) return(1);
 
-	emp = atoi(av[1]);
+	emp = (int) strtol(av[1], NULL, 10);
 	lseek(fd, EMPIRE(emp), 0);
 	read(fd, &game.empires[emp], sizeof(struct empire));
 	strcpy(game.empires[emp].e_name, av[2]);
