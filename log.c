@@ -96,7 +96,7 @@ checklog()
 		if (++n % 15 == 0) {
 			fputs("Press return to continue: ", stdout);
 			fflush(stdout);
-			gets(buf);
+			fgets(buf, BUFSIZ, stdin);
 			if (buf[0] == 'q' || buf[0] == 'Q') break;
 		}
 	}
@@ -149,7 +149,7 @@ read_tele(int num, char flag)
 			char buffer[BUFSIZ];
 			printf("Press return to continue: ");
 			fflush(stdout);
-			gets(buffer);
+			fgets(buffer, BUFSIZ, stdin);
 			if (buffer[0] == 'q' || buffer[0] == 'n') break;
 			putchar ('\n');
 		}

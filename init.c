@@ -240,7 +240,7 @@ do_enroll() {
 	fputs("Enter a name for your empire (up to 20 characters): ", stdout);
 	fflush(stdout);
 
-	while ((c = gets(buf)) != NULL) {
+	while ((c = fgets(buf, BUFSIZ, stdin)) != NULL) {
 		size_t len = strlen(buf);
 		int j;
 		char good = 1;
