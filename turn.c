@@ -68,7 +68,7 @@ check_turn() {
 	lasttime = game.hdr.up_last;
 
 	if (verbose) {
-		long sec = game.hdr.up_last + game.hdr.up_time - time();
+		long sec = game.hdr.up_last + game.hdr.up_time - NOW;
 		long min = sec / 60, hour = 0;
 		sec %= 60;
 		
@@ -232,7 +232,7 @@ do_turn()
 	lseek(fd, 0L, 0);
 	read(fd, &game, sizeof(game));
 	turn();
-	game.hdr.up_last = time();
+	game.hdr.up_last = NOW;
 	game.hdr.up_num++;
 	lseek(fd, 0L, 0);
 	write(fd, &game, sizeof(game));

@@ -7,7 +7,12 @@
 
 extern char **environ;
 
+#ifdef _GTTY_COMPAT_
+struct  sgttyb_compat _tty;
+#else
 struct sgttyb _tty;
+#endif
+
 int xputc(char);
 
 static char tbuf[512];
@@ -23,7 +28,11 @@ initscreen()
 	tptr = (char *) malloc(1024);
 	tbufptr = tbuf;
 
+#ifdef _GTTY_COMPAT_
+	ioctl(0, TIOCGETD, &_tty);
+#else
 	gtty(0, &_tty);
+#endif
 
 	if(tgetent(tptr, getenv("TERM")) < 1) {
 		puts("Unknown terminal type");

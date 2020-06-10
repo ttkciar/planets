@@ -308,3 +308,6 @@ This game and its source code is public domain.
  
 * Bill Karwin (2018-12-09), ported to C11, wrote new documentation,
   added command-line options and global config file.
+
+* TTK Ciar (2020-06-09),
+  added Linux compatibility: compile with -DLINUX -lncurses -lm

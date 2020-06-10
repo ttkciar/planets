@@ -136,3 +136,20 @@ int fd;
 
 #define MAX_X 60
 #define MAX_Y 120
+
+#ifdef LINUX
+#ifndef _GTTY_COMPAT_
+#define _GTTY_COMPAT_
+#include <sys/ioctl.h>
+struct  sgttyb_compat {
+        char    sg_ispeed;              /* input speed */
+        char    sg_ospeed;              /* output speed */
+        char    sg_erase;               /* erase character */
+        char    sg_kill;                /* kill character */
+        short   sg_flags;               /* mode flags */
+};
+#endif
+#define NOW time(NULL)
+#else
+#define NOW time()
+#endif
